@@ -1,3 +1,13 @@
-After the project, you can review the solution here:
+<h1>Know Thy Self: Building ActiveRecord</h1>
 
-* https://github.com/appacademy-solutions/active_record_lite/tree/solution
+A lite version of ActiveRecord built from scratch, an excellent exercise in metaprogramming. I make heavy use of class methods, class instance variables, <code>define_method</code>, and modules.
+
+This project is all about scope: Who am I? That is, who is <code>self</code>? Assume a class <code>Human</code> and an instance of that class Bob Bobberson: Human Extraordinaire. If I am in a class method, of course, <code>self</code> is the class itself (<code>Human</code>). If I'm in an instance method, it's (I'm) Bob. But while it really is that simple, there are some tricky situations in which a naive young programmer might *think* he's <code>Human</code> when he's really just *a* human. 
+
+For instance (hah!), take our BFF <code>define_method</code>. We call it in the *class* scope to create instance methods for members of those classes to use, but because it creates code to be run in instances, what looks like a part of it--specifically, the block that gets passed to it *inside the code for the class*--is, within that block itself, code that will be run in the *instance* scope, because <code>define_method</code> takes a block and turns that block into an instance method. When doing something as meta as writing ActiveRecord, you have to master this distinction to get anywhere.
+
+A similar issue applies in relation to modules. After this project, I will never again be confused about the difference between the <code>include</code> and <code>extend</code> keywords; the former adds the methods of the module as *instance* methods, the latter as *class* methods. They will, however, look exactly the same in the module, and indeed the same module can be either included or extended. If I'm going to get anywhere with my code, though, I need to be very aware of whether I'm planning to include or extend. 
+
+Building my own version of the <code>has_many</code>, <code>belongs_to</code>, and <code>has_one</code> associations was also instructive. To mimic Rails' ability to assume the conventional <code>foreign_key</code>, <code>primary_key</code>, and <code>class_name</code> unless they are explicitly provided, I created objects to apply the logic to create these default values and then merge that default hash with the explicitly provided hash, if any, so that the user can overwrite convention. These objects also have methods to provide their table names in the database (whether this is the Rails convention or has been overridden) and to provide a class object corresponding to the string in <code>class_name</code>.
+
+For <code>has_one_through</code> to work, these option objects have to be stored in a class instance variable hash, so that the bridge from (for instance) cat to owner to house (where cat <code>belongs_to</code> owner and owner <code>belongs_to</code> house, and cat therefore <code>has_one</code> house) can be constructed.
